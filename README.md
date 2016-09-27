@@ -6,22 +6,22 @@ Simple test menu for android
 
 In your main build.gradle
 
-````
+<pre>
 allprojects {
     repositories {
         jcenter()
-        maven { url "https://jitpack.io" }
+        <b>maven { url "https://jitpack.io" }</b>
     }
 }
-````
+</pre>
 
 In your project
 
-````
+<pre>
 dependencies {
-    compile 'com.github.tekartik:test.android:0.1.0'
+    <b>compile 'com.github.tekartik:test.android:0.1.0'</b>
 }
-````
+</pre>
 
 ## Usage
 

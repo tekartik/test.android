@@ -34,12 +34,14 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
+# .idea/workspace.xml
+# .idea/tasks.xml
+# remove all
+.idea/
 
 # gradle
-.idea/libraries
-.idea/gradle.xml
+# .idea/libraries
+# .idea/gradle.xml
 
 # Keystore files
 *.jks
