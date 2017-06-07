@@ -17,6 +17,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -31,6 +33,14 @@ import java.util.List;
  * Created by alex on 27/06/16.
  */
 public class Test {
+
+    public interface TextInputListener {
+        void onText(String text);
+    }
+
+    public interface TextInputWithCancelListener extends TextInputListener {
+        void onCancel();
+    }
 
     static public class BuildConfig {
         // To override by caller if needed
@@ -120,10 +130,27 @@ public class Test {
             getFragment().setListAdapter(mAdapter);
         }
 
+        @Deprecated
         protected void start(Class<? extends Activity> activityClass) {
+            startActivity(activityClass);
+
+        }
+
+        protected void startActivity(Class<? extends Activity> activityClass) {
             Log.i(TAG, "Starting " + activityClass);
             getActivity().startActivity(new Intent(getActivity(), activityClass));
+        }
 
+        protected void startActivity(Intent intent) {
+            getActivity().startActivity(intent);
+        }
+
+        protected void startActivityForResult(Intent intent, int requestCode) {
+            getActivity().startActivityForResult(intent, requestCode);
+        }
+
+        private void removeAutoStart() {
+            getPrefs().edit().remove(getPrefKey(ITEM_ON_START_KEY)).apply();
         }
 
         private void setAutoStartFrom(SharedPreferences prefs, EditText editText) {
@@ -138,7 +165,7 @@ public class Test {
                 Log.e(TAG, e.getMessage(), e);
             }
             editor.putInt(getPrefKey(ITEM_ON_START_KEY), defaultItem);
-            editor.commit();
+            editor.apply();
             Log.i(TAG, "Entered: " + value);
         }
 
@@ -160,36 +187,123 @@ public class Test {
             return getActivity().getPreferences(0);
         }
 
-        public void getAutoStart() {
+        private void getAutoStart() {
             final EditText editText = new EditText(getActivity());
             editText.setSingleLine();
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             editText.setHint("menu item index from 1 to " + (items.length - 1));
-            final SharedPreferences prefs = getActivity().getPreferences(0);
+            final SharedPreferences prefs = getPrefs();
             int defaultItem = prefs.getInt(getPrefKey(ITEM_ON_START_KEY), -1);
             if (defaultItem >= 0 && defaultItem < items.length) {
                 editText.setText(Integer.toString(defaultItem));
                 editText.selectAll();
             }
-            editText.setImeActionLabel("OK", KeyEvent.KEYCODE_ENTER);
-            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    boolean handled = false;
-                    if (actionId == KeyEvent.KEYCODE_ENTER) {
-                        setAutoStartFrom(prefs, editText);
-                        handled = true;
-                    }
-                    return handled;
-                }
-            });
-            new AlertDialog.Builder(getActivity()).setTitle("Auto start").setMessage("Enter auto-start index").setView(editText)
+
+            final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle("Auto start").setMessage("Enter auto-start index").setView(editText)
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int whichButton) {
                             setAutoStartFrom(prefs, editText);
                         }
-                    }).setNegativeButton(android.R.string.cancel, null).show();
+                    }).setNegativeButton(android.R.string.cancel, null).setNeutralButton("none", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            removeAutoStart();
+                        }
+                    }).show();
+            editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    }
+                }
+            });
+            editText.setImeActionLabel("OK", EditorInfo.IME_ACTION_DONE);
+            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    boolean handled = false;
+                    if (actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                        setAutoStartFrom(prefs, editText);
+                        dialog.dismiss();
+                        handled = true;
+                    }
+                    return handled;
+                }
+            });
+
+            editText.requestFocus();
+        }
+
+        public void getText(final TextInputListener listener) {
+            getText(listener, null, "Enter text", null, InputType.TYPE_CLASS_TEXT);
+        }
+
+        // InputType.TYPE_CLASS_NUMBER
+        public void getText(final TextInputListener listener, String defaultText, String title, String message, int inputType) {
+            final EditText editText = new EditText(getActivity());
+
+            boolean singleLine = (inputType & (InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE | InputType.TYPE_TEXT_FLAG_MULTI_LINE)) == 0;
+            if (singleLine) {
+                editText.setSingleLine();
+            }
+
+            editText.setInputType(inputType);
+            if (title != null) {
+                editText.setHint(title);
+            }
+            if (defaultText != null) {
+                editText.setText(defaultText);
+                editText.selectAll();
+            }
+
+            if (title == null) {
+                title = "Enter text";
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setTitle(title).setView(editText)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            listener.onText(editText.getText().toString());
+                        }
+                    }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (listener instanceof TextInputWithCancelListener) {
+                                ((TextInputWithCancelListener) listener).onCancel();
+                            }
+                        }
+                    });
+            if (message != null) {
+                builder.setMessage(message);
+            }
+
+            final AlertDialog dialog = builder.show();
+            editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    }
+                }
+            });
+            if (singleLine) {
+                editText.setImeActionLabel("OK", EditorInfo.IME_ACTION_DONE);
+                editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        boolean handled = false;
+                        if (actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                            listener.onText(editText.getText().toString());
+                            dialog.dismiss();
+                            handled = true;
+                        }
+                        return handled;
+                    }
+                });
+            }
+            editText.requestFocus();
         }
 
         protected void onResume() {
@@ -274,11 +388,6 @@ public class Test {
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             Log.i(TAG, "request " + requestCode + " result " + resultCode); // + " data " + BundleUtils.toString(data));
-        }
-
-        public void startActivityForResult(Intent intent, int requestCode) {
-            //getActivity().startActivityForResult(intent, requestCode);
-            getFragment().startActivityForResult(intent, requestCode);
         }
 
         public abstract class Item {
