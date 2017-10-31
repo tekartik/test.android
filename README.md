@@ -20,7 +20,7 @@ In your project
 
 <pre>
 dependencies {
-    <b>compile 'com.github.tekartik:test.android:0.2.0'</b>
+    <b>compile 'com.github.tekartik:test.android:0.3.0'</b>
 }
 </pre>
 
@@ -88,3 +88,9 @@ And add it to your manifest
     </activity>
 </application>
 ````
+
+## Dev
+
+Before checking run
+
+    ./run_unit_test.sh
