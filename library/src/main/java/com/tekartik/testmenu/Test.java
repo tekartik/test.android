@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alex on 27/06/16.
+ * Test class container for test menu helpers
  */
 public class Test {
 
@@ -47,6 +47,9 @@ public class Test {
         static public boolean DEBUG = com.tekartik.testmenu.BuildConfig.DEBUG;
     }
 
+    /**
+     * Menu helper
+     */
     public abstract static class Menu {
 
         public static final String TAG = "Menu";
@@ -67,10 +70,14 @@ public class Test {
          *
          * @return start menu
          */
-        static public Menu getStartMenu() {
+        static Menu getStartMenu() {
             return sStartMenu;
         }
 
+        /**
+         * Set the main start menu
+         * @param startMenu
+         */
         static public void setStartMenu(Menu startMenu) {
             sStartMenu = startMenu;
         }
@@ -79,6 +86,9 @@ public class Test {
             return getActivity();
         }
 
+        /**
+         * @return the current activity
+         */
         protected Activity getActivity() {
             return mFragment.getActivity();
         }
@@ -87,6 +97,9 @@ public class Test {
             return mName;
         }
 
+        /**
+         * @return the fragment containing the menu
+         */
         protected MenuFragment getFragment() {
             return mFragment;
 
@@ -136,6 +149,11 @@ public class Test {
 
         }
 
+        /**
+         * start an activity
+         *
+         * @param activityClass
+         */
         protected void startActivity(Class<? extends Activity> activityClass) {
             Log.i(TAG, "Starting " + activityClass);
             getActivity().startActivity(new Intent(getActivity(), activityClass));
@@ -145,6 +163,12 @@ public class Test {
             getActivity().startActivity(intent);
         }
 
+        /**
+         * start an activity with a request code
+         *
+         * @param intent
+         * @param requestCode
+         */
         protected void startActivityForResult(Intent intent, int requestCode) {
             getActivity().startActivityForResult(intent, requestCode);
         }
@@ -324,18 +348,33 @@ public class Test {
             Log.d(TAG, "onPause");
         }
 
+        /**
+         * Show a bitmap
+         *
+         * @param bmp
+         */
         public void showBitmap(Bitmap bmp) {
             ImageView imageView = new ImageView(getContext());
             imageView.setImageBitmap(bmp);
             showImage(imageView);
         }
 
+        /**
+         * Show an image
+         *
+         * @param imageView
+         */
         public void showImage(ImageView imageView) {
             Toast toast = new Toast(getActivity());
             toast.setView(imageView);
             toast.show();
         }
 
+        /**
+         * Show a toast
+         *
+         * @param text
+         */
         public void showToast(String text) {
             Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
         }
@@ -354,10 +393,18 @@ public class Test {
         //		}
         //	}
 
+        /**
+         * Show a sub menu
+         *
+         * @param menu
+         */
         protected void showMenu(Menu menu) {
             getFragment().showMenu(menu);
         }
 
+        /**
+         * back up one level
+         */
         protected void back() {
             getFragment().back();
         }
@@ -449,7 +496,7 @@ public class Test {
             @Override
             public void execute() {
                 // Log.i(TAG, "Starting " + activityClass);
-                start(activityClass);
+                startActivity(activityClass);
             }
         }
 
@@ -512,7 +559,7 @@ public class Test {
 
         List<Menu> mMenus = new ArrayList<>();
 
-        boolean mActiveMenuCreated;
+        //boolean mActiveMenuCreated;
         boolean mActiveMenuResumed;
 
         public Menu getCurrentMenu() {
@@ -617,9 +664,13 @@ public class Test {
 
         @Override
         public void onListItemClick(ListView l, View v, int position, long id) {
-            Menu.Item item = ((Menu.Adapter) getListAdapter()).getItem(position);
             Log.d(TAG, String.format("Test Item: %d", position));
-            item.execute();
+            Menu.Item item = ((Menu.Adapter) getListAdapter()).getItem(position);
+            if (item != null) {
+                item.execute();
+            } else {
+                Toast.makeText(getActivity(), "Test item at " + position + " not found", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override

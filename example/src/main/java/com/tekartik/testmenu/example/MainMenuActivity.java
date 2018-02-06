@@ -35,7 +35,9 @@ public class MainMenuActivity extends Test.MenuActivity {
                             startActivityForResult(new Intent(getActivity(), MainMenuActivity.class), SUB_MENU_REQUEST_CODE);
                         }
                     },
-                    new MenuItem(new TextTestMenu())
+                    new MenuItem(new TextTestMenu()),
+                    new MenuItem(new ApiTestMenu()),
+                    null
 
             );
 
