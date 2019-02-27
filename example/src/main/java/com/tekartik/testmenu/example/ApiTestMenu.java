@@ -4,7 +4,7 @@ import com.tekartik.testmenu.Test;
 
 /**
  * Created by alex on 06/02/18.
- *
+ * <p>
  * Test public api
  */
 

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -61,6 +62,8 @@ public class Test {
         private MenuFragment mFragment;
         private Item[] items;
         private Adapter mAdapter;
+        // Set in showMenu by framework
+        private Menu parentMenu;
 
         protected Menu(String name) {
             mName = name;
@@ -119,13 +122,14 @@ public class Test {
         }
 
         protected void initItems(Item... items) {
-            Log.i(TAG, "init " + items.length + " items");
-            Log.i(TAG, "BuildConfig.DEBUG: " + BuildConfig.DEBUG);
+            // Log.i(TAG, "init " + items.length + " items");
+            // Log.i(TAG, "BuildConfig.DEBUG: " + BuildConfig.DEBUG);
 
             ArrayList<Item> newItems = new ArrayList<>();
 
             for (Item item : items) {
                 if (item != null) {
+                    // set parant menu
                     newItems.add(item);
                 }
             }
@@ -195,6 +199,17 @@ public class Test {
          */
         private void setAutoStart(Integer index) {
 
+            // On debug long press on choose, discard the auto start
+            if (index != null) {
+                if (BuildConfig.DEBUG) {
+                    if (index <= 0) {
+                        index = null;
+                    } else if (index < 0) {
+                        index = null;
+                    }
+                }
+            }
+
             if (index != null) {
                 SharedPreferences.Editor editor = getPrefs().edit();
                 editor.putInt(getPrefKey(ITEM_ON_START_KEY), index);
@@ -237,8 +252,17 @@ public class Test {
             Log.d(TAG, "onDestroy");
         }
 
+        private String getPrefKeyPrefix() {
+            if (parentMenu != null) {
+                return parentMenu.getPrefKeyPrefix() + "/" + getName();
+            } else {
+                return getName();
+            }
+        }
+
         protected String getPrefKey(String key) {
-            return getName() + "-" + key;
+
+            return getPrefKeyPrefix() + "-" + key;
         }
 
         public SharedPreferences getPrefs() {
@@ -419,6 +443,7 @@ public class Test {
          * @param menu
          */
         protected void showMenu(Menu menu) {
+            menu.parentMenu = this;
             getFragment().showMenu(menu);
         }
 
@@ -432,6 +457,11 @@ public class Test {
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             Log.i(TAG, "request " + requestCode + " result " + resultCode); // + " data " + BundleUtils.toString(data));
+        }
+
+        @Override
+        public String toString() {
+            return getName() + (items == null ? "" : " " + items.length + "items");
         }
 
         public abstract class Item {
@@ -452,6 +482,10 @@ public class Test {
             String getName() {
                 return name;
             }
+        }
+
+        private abstract class ItemBase {
+
         }
 
         public class MenuItem extends Item {
@@ -510,8 +544,19 @@ public class Test {
                     LayoutInflater inflater = getActivity().getLayoutInflater();
                     row = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
                 }
-                TextView label = (TextView) row.findViewById(android.R.id.text1);
-                label.setText(position + " " + getItem(position).getName());
+
+                TextView label = row.findViewById(android.R.id.text1);
+                Item item = getItem(position);
+                label.setText(position + " " + item.getName());
+                Integer color = null;
+                if (position == 0 && BuildConfig.DEBUG) {
+                    color = Color.argb(15, 120, 120, 255);
+                } else if (item instanceof MenuItem) {
+                    color = Color.argb(15, 120, 190, 120);
+                }
+                if (color != null) {
+                    row.setBackgroundColor(color);
+                }
 
                 return (row);
             }
@@ -554,6 +599,7 @@ public class Test {
 
         static final String TAG = "MenuFragment";
 
+        // Menu stack
         List<Menu> mMenus = new ArrayList<>();
 
         //boolean mActiveMenuCreated;
@@ -595,20 +641,6 @@ public class Test {
             mMenus.add(menu);
 
             menu.onCreate();
-
-            getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Integer existing = menu.getAutoStart();
-                    if (existing == null || position != existing) {
-                        menu.setAutoStart(position);
-                    } else {
-                        menu.setAutoStart(null);
-                    }
-                    return true;
-                }
-            });
-
         }
 
         void showMenu(Menu menu) {
@@ -651,6 +683,24 @@ public class Test {
             } else {
                 showMenu(startMenu);
             }
+
+            getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Menu menu = getCurrentMenu();
+                    if (menu != null) {
+                        Integer existing = menu.getAutoStart();
+                        if (existing == null || position != existing) {
+                            menu.setAutoStart(position);
+                        } else {
+                            menu.setAutoStart(null);
+                        }
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
 
         }
 

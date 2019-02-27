@@ -9,6 +9,13 @@ import com.tekartik.testmenu.Test;
 
 public class MainMenuActivity extends Test.MenuActivity {
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Test.BuildConfig.DEBUG = BuildConfig.DEBUG;
+        Test.Menu.setStartMenu(new MainTestMenu());
+    }
+
     static public class MainTestMenu extends Test.Menu {
 
         static int SUB_MENU_REQUEST_CODE = 1;
@@ -35,6 +42,7 @@ public class MainMenuActivity extends Test.MenuActivity {
                             startActivityForResult(new Intent(getActivity(), MainMenuActivity.class), SUB_MENU_REQUEST_CODE);
                         }
                     },
+                    new MenuItem(new SubTestMenu()),
                     new MenuItem(new TextTestMenu()),
                     new MenuItem(new ApiTestMenu()),
                     null
@@ -50,13 +58,36 @@ public class MainMenuActivity extends Test.MenuActivity {
         }
     }
 
+    static public class SubTestMenu extends Test.Menu {
+
+        protected SubTestMenu() {
+            super("Sub menu");
+        }
+
+        @Override
+        protected void onCreate() {
+            super.onCreate();
+            Log.i(TAG, "MainTestMenu");
+            initItems(
+                    new Item("showToast") {
+                        @Override
+                        public void execute() {
+                            showToast("Toast from Sub menu");
+                        }
+                    },
+                    null
+            );
+
+        }
+    }
+
     static public class TextTestMenu extends Test.Menu {
+
+        String text;
 
         protected TextTestMenu() {
             super("Text");
         }
-
-        String text;
 
         @Override
         protected void onCreate() {
@@ -123,12 +154,5 @@ public class MainMenuActivity extends Test.MenuActivity {
 
         }
 
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Test.BuildConfig.DEBUG = BuildConfig.DEBUG;
-        Test.Menu.setStartMenu(new MainTestMenu());
     }
 }

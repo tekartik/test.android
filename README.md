@@ -91,6 +91,4 @@ And add it to your manifest
 
 ## Dev
 
-Before checking run
-
-    ./run_unit_test.sh
+* [Development](doc/dev.md) information
