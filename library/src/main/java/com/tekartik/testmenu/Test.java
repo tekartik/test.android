@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -76,6 +77,7 @@ public class Test {
 
         /**
          * Set the main start menu
+         *
          * @param startMenu
          */
         static public void setStartMenu(Menu startMenu) {
@@ -133,7 +135,7 @@ public class Test {
 
                     @Override
                     public void execute() {
-                        getAutoStart();
+                        editAutoStart();
 
                     }
                 });
@@ -175,22 +177,54 @@ public class Test {
 
         private void removeAutoStart() {
             getPrefs().edit().remove(getPrefKey(ITEM_ON_START_KEY)).apply();
+            showToast("Auto start removed");
         }
 
-        private void setAutoStartFrom(SharedPreferences prefs, EditText editText) {
+        private Integer getAutoStart() {
+            int defaultItem = getPrefs().getInt(getPrefKey(ITEM_ON_START_KEY), -1);
+            if (defaultItem < 0) {
+                return null;
+            }
+            return defaultItem;
+        }
+
+        /**
+         * remove the pref if index is null
+         *
+         * @param index
+         */
+        private void setAutoStart(Integer index) {
+
+            if (index != null) {
+                SharedPreferences.Editor editor = getPrefs().edit();
+                editor.putInt(getPrefKey(ITEM_ON_START_KEY), index);
+                editor.apply();
+
+                String name = null;
+                if (index < items.length) {
+                    Item item = items[index];
+                    name = item.getName();
+                }
+                showToast("Auto start: " + index + " " + name);
+
+            } else {
+                removeAutoStart();
+            }
+
+
+        }
+
+        private void setAutoStartFrom(EditText editText) {
             Editable value = editText.getText();
 
-            SharedPreferences.Editor editor = prefs.edit();
 
-            int defaultItem = -1;
+            Integer index = null;
             try {
-                defaultItem = Integer.parseInt(value.toString());
+                index = Integer.parseInt(value.toString());
             } catch (NumberFormatException e) {
-                Log.e(TAG, e.getMessage(), e);
+                // Log.e(TAG, e.getMessage(), e);
             }
-            editor.putInt(getPrefKey(ITEM_ON_START_KEY), defaultItem);
-            editor.apply();
-            Log.i(TAG, "Entered: " + value);
+            setAutoStart(index);
         }
 
         protected void onCreate() {
@@ -211,13 +245,12 @@ public class Test {
             return getActivity().getPreferences(0);
         }
 
-        private void getAutoStart() {
+        private void editAutoStart() {
             final EditText editText = new EditText(getActivity());
             editText.setSingleLine();
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             editText.setHint("menu item index from 1 to " + (items.length - 1));
-            final SharedPreferences prefs = getPrefs();
-            int defaultItem = prefs.getInt(getPrefKey(ITEM_ON_START_KEY), -1);
+            int defaultItem = getPrefs().getInt(getPrefKey(ITEM_ON_START_KEY), -1);
             if (defaultItem >= 0 && defaultItem < items.length) {
                 editText.setText(Integer.toString(defaultItem));
                 editText.selectAll();
@@ -227,7 +260,7 @@ public class Test {
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            setAutoStartFrom(prefs, editText);
+                            setAutoStartFrom(editText);
                         }
                     }).setNegativeButton(android.R.string.cancel, null).setNeutralButton("none", new DialogInterface.OnClickListener() {
                         @Override
@@ -249,7 +282,7 @@ public class Test {
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                     boolean handled = false;
                     if (actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                        setAutoStartFrom(prefs, editText);
+                        setAutoStartFrom(editText);
                         dialog.dismiss();
                         handled = true;
                     }
@@ -377,21 +410,8 @@ public class Test {
          */
         public void showToast(String text) {
             Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "[toast] " + text);
         }
-
-        //	@Override
-        //	protected void onCreate(Bundle savedInstanceState) {
-        //		super.onCreate(savedInstanceState);
-        //
-        //		// Create the list fragment and add it as our sole content.
-        //		Fragment fragment = getFragmentManager().findFragmentById(android.R.id.content);
-        //		if (fragment == null) {
-        //			list = new ArrayListFragment();
-        //			getFragmentManager().beginTransaction().add(android.R.id.content, list).commit();
-        //		} else {
-        //			list = (ArrayListFragment) fragment;
-        //		}
-        //	}
 
         /**
          * Show a sub menu
@@ -409,29 +429,6 @@ public class Test {
             getFragment().back();
         }
 
-        //	static public class ArrayListFragment extends ListFragment {
-        //
-        //		public ArrayListFragment() {
-        //		}
-        //
-        //		/** Called when the activity is first created. */
-        //		@Override
-        //		public void onActivityCreated(Bundle savedInstanceState) {
-        //			super.onCreate(savedInstanceState);
-        //
-        //			Log.v(TAG, "onCreate");
-        //
-        //			// BaseMenuActivity activity = (BaseMenuActivity)getActivity();
-        //
-        //		}
-        //
-        //		@Override
-        //		public void onListItemClick(ListView l, View v, int position, long id) {
-        //			Item item = ((Adapter) getListAdapter()).getItem(position);
-        //			Log.i(TAG, String.format("Test Item: %d", position));
-        //			item.execute();
-        //		}
-        //	}
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             Log.i(TAG, "request " + requestCode + " result " + resultCode); // + " data " + BundleUtils.toString(data));
@@ -587,7 +584,7 @@ public class Test {
             }
         }
 
-        private void initMenu(Menu menu) {
+        private void initMenu(final Menu menu) {
 
             if (mMenus.contains(menu)) {
                 Log.e(TAG, "Menu already in hierarchy");
@@ -598,6 +595,20 @@ public class Test {
             mMenus.add(menu);
 
             menu.onCreate();
+
+            getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Integer existing = menu.getAutoStart();
+                    if (existing == null || position != existing) {
+                        menu.setAutoStart(position);
+                    } else {
+                        menu.setAutoStart(null);
+                    }
+                    return true;
+                }
+            });
+
         }
 
         void showMenu(Menu menu) {
@@ -625,6 +636,14 @@ public class Test {
             super.onCreate(savedInstanceState);
 
             mActiveMenuResumed = false;
+
+
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
 
             Menu startMenu = Menu.getStartMenu();
             if (startMenu == null) {
@@ -661,6 +680,7 @@ public class Test {
                 currentMenu.onResume();
             }
         }
+
 
         @Override
         public void onListItemClick(ListView l, View v, int position, long id) {
