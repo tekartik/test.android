@@ -1,14 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.sdkVersion
 
     defaultConfig {
         applicationId "com.tekartik.testmenu.example"
         minSdkVersion 15
-        targetSdkVersion 28
+        targetSdkVersion rootProject.ext.sdkVersion
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
@@ -16,11 +19,26 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    productFlavors {
+    }
+
+    useLibrary 'android.test.runner'
+
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Testing-only dependencies
+    androidTestImplementation 'androidx.test:core:' + rootProject.testCoreVersion;
+    androidTestImplementation 'androidx.test.ext:junit:' + rootProject.testExtJUnitVersion;
+    androidTestImplementation 'androidx.test:runner:' + rootProject.testRunnerVersion;
+    androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.testEspressoVersion;
+
     testImplementation 'junit:junit:4.12'
-    implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation project(':library')
+    implementation "androidx.fragment:fragment:${fragmentVersion}"
+    implementation "androidx.appcompat:appcompat:${appCompatVersion}"
 }

@@ -32,7 +32,7 @@ public class MainMenuActivity extends Test.MenuActivity {
                     new Item("showToast") {
                         @Override
                         public void execute() {
-                            showToast("Hi");
+                            showToast(Utils.getPublicInfo());
                         }
                     },
                     new ActivityItem(MainMenuActivity.class),

@@ -1,9 +1,11 @@
 package com.tekartik.testmenu;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.ListFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.ListFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import java.util.List;
  * Test class container for test menu helpers
  */
 public class Test {
+    static public String TAG = "Test";
 
     public interface TextInputListener {
         void onText(String text);
@@ -44,6 +47,9 @@ public class Test {
         void onCancel();
     }
 
+    /**
+     * Must be access using 'Test.BuildConfig.DEBUG'
+     */
     static public class BuildConfig {
         // To override by caller if needed
         static public boolean DEBUG = com.tekartik.testmenu.BuildConfig.DEBUG;
@@ -54,7 +60,7 @@ public class Test {
      */
     public abstract static class Menu {
 
-        public static final String TAG = "Menu";
+        protected static final String TAG = Test.TAG;
         static final String ITEM_ON_START_KEY = "start_item"; // int
         static private Menu sStartMenu;
         boolean firstResume = true;
@@ -563,7 +569,7 @@ public class Test {
         }
     }
 
-    public static class MenuActivity extends Activity {
+    public static class MenuActivity extends AppCompatActivity {
 
         public static final String TAG = MenuActivity.class.getSimpleName();
 
@@ -574,10 +580,10 @@ public class Test {
             super.onCreate(savedInstanceState);
 
             // Create the list fragment and add it as our sole content.
-            Fragment fragment = getFragmentManager().findFragmentById(android.R.id.content);
+            Fragment fragment = getSupportFragmentManager().findFragmentById(android.R.id.content);
             if (fragment == null) {
                 mMenuFragment = new MenuFragment();
-                getFragmentManager().beginTransaction().add(android.R.id.content, mMenuFragment).commit();
+                getSupportFragmentManager().beginTransaction().add(android.R.id.content, mMenuFragment).commit();
             } else {
                 mMenuFragment = (MenuFragment) fragment;
             }

@@ -1,13 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.sdkVersion
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 28
-        versionCode 3
-        versionName "0.5.0"
+        targetSdkVersion rootProject.ext.sdkVersion
     }
     buildTypes {
         release {
@@ -20,5 +18,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
+    implementation "androidx.fragment:fragment:${fragmentVersion}"
+    implementation "androidx.appcompat:appcompat:${appCompatVersion}"
 }
 
