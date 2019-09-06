@@ -34,7 +34,7 @@ dependencies {
     // Testing-only dependencies
     androidTestImplementation 'androidx.test:core:' + rootProject.testCoreVersion;
     androidTestImplementation 'androidx.test.ext:junit:' + rootProject.testExtJUnitVersion;
-    androidTestImplementation 'androidx.test:runner:' + rootProject.testRunnerVersion;
+    androidTestImplementation "androidx.test:runner:${testRunnerVersion}"
     androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.testEspressoVersion;
 
     testImplementation 'junit:junit:4.12'

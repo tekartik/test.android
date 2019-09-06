@@ -1,11 +1,7 @@
 package com.tekartik.testmenu;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.ListFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +25,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.ListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -591,6 +591,7 @@ public class Test {
 
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
             //Log.i(TAG, "request " + requestCode + " result " + resultCode + " data " + ((data == null) ? null : data.getExtras()));
 
             Menu currentMenu = mMenuFragment.getCurrentMenu();
