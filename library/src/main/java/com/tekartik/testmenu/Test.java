@@ -85,9 +85,11 @@ public class Test {
         }
 
         /**
-         * Set the main start menu
+         * Set the main start menu.
          *
-         * @param startMenu
+         * First call to make.
+         *
+         * @param startMenu menu to start with
          */
         static public void setStartMenu(Menu startMenu) {
             sStartMenu = startMenu;
@@ -164,7 +166,7 @@ public class Test {
         /**
          * start an activity
          *
-         * @param activityClass
+         * @param activityClass activity class
          */
         protected void startActivity(Class<? extends Activity> activityClass) {
             Log.i(TAG, "Starting " + activityClass);
@@ -178,8 +180,8 @@ public class Test {
         /**
          * start an activity with a request code
          *
-         * @param intent
-         * @param requestCode
+         * @param intent intent
+         * @param requestCode request code
          */
         protected void startActivityForResult(Intent intent, int requestCode) {
             getActivity().startActivityForResult(intent, requestCode);
@@ -209,8 +211,6 @@ public class Test {
             if (index != null) {
                 if (BuildConfig.DEBUG) {
                     if (index <= 0) {
-                        index = null;
-                    } else if (index < 0) {
                         index = null;
                     }
                 }
