@@ -20,7 +20,9 @@ In your project
 
 <pre>
 dependencies {
-    <b>compile 'com.github.tekartik:test.android:0.5.2'</b>
+    <b>implementation "com.github.tekartik:test.android:0.5.2"<b>
+    implementation "androidx.appcompat:appcompat:1.2.0"
+    implementation "androidx.fragment:fragment:1.2.5"
 }
 </pre>
 
