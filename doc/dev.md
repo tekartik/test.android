@@ -8,4 +8,4 @@ Before checking run
 
 * Update [change log](../CHANGELOG.md)
 * In <https://github.com/tekartik/test.android/releases> Draft a new release and put the version
-as the tag (no title)
+as the tag (no title) for example 0.7.0

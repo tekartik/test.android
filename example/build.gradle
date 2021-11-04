@@ -32,12 +32,12 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Testing-only dependencies
-    androidTestImplementation 'androidx.test:core:' + rootProject.testCoreVersion;
-    androidTestImplementation 'androidx.test.ext:junit:' + rootProject.testExtJUnitVersion;
+    androidTestImplementation 'androidx.test:core:' + rootProject.testCoreVersion
+    androidTestImplementation 'androidx.test.ext:junit:' + rootProject.testExtJUnitVersion
     androidTestImplementation "androidx.test:runner:${testRunnerVersion}"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.testEspressoVersion;
+    androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.testEspressoVersion
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     implementation project(':library')
     implementation "androidx.fragment:fragment:${fragmentVersion}"
     implementation "androidx.appcompat:appcompat:${appCompatVersion}"
