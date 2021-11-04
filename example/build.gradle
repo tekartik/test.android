@@ -5,7 +5,7 @@ android {
 
     defaultConfig {
         applicationId "com.tekartik.testmenu.example"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion rootProject.ext.sdkVersion
         versionCode 1
         versionName "1.0"
@@ -31,13 +31,17 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.navigation:navigation-fragment:2.3.5'
+    implementation 'androidx.navigation:navigation-ui:2.3.5'
     // Testing-only dependencies
-    androidTestImplementation 'androidx.test:core:' + rootProject.testCoreVersion
-    androidTestImplementation 'androidx.test.ext:junit:' + rootProject.testExtJUnitVersion
+    androidTestImplementation "androidx.test:core:${testCoreVersion}"
+    androidTestImplementation "androidx.test.ext:junit:${testExtJUnitVersion}"
     androidTestImplementation "androidx.test:runner:${testRunnerVersion}"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.testEspressoVersion
+    androidTestImplementation "androidx.test.espresso:espresso-core:${testEspressoVersion}"
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:${testJunitVersion}"
     implementation project(':library')
     implementation "androidx.fragment:fragment:${fragmentVersion}"
     implementation "androidx.appcompat:appcompat:${appCompatVersion}"
